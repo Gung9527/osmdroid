@@ -27,6 +27,7 @@ import org.osmdroid.tileprovider.util.SimpleInvalidationHandler;
 import org.osmdroid.util.BoundingBox;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.util.GeometryMath;
+import org.osmdroid.util.ITileSystem;
 import org.osmdroid.util.TileSystem;
 import org.osmdroid.views.overlay.DefaultOverlayManager;
 import org.osmdroid.views.overlay.Overlay;
@@ -1732,5 +1733,9 @@ public class MapView extends ViewGroup implements IMapView,
 	 */
 	public void setZoomRounding(final boolean pZoomRounding) {
 		mZoomRounding = pZoomRounding;
+	}
+
+	protected ITileSystem getTileSystem() {
+		return TileSystem.DEFAULT;
 	}
 }

@@ -17,6 +17,38 @@ import org.osmdroid.util.constants.GeoConstants;
  */
 public final class TileSystem {
 
+	public static final ITileSystem DEFAULT = new ITileSystem() {
+
+		private final BoundingBox mGeographicBoundingBox = new BoundingBox(
+				TileSystem.MaxLatitude, TileSystem.MaxLongitude,
+				TileSystem.MinLatitude, TileSystem.MinLongitude);
+
+		@Override
+		public BoundingBox getGeographicBoundingBox() {
+			return mGeographicBoundingBox;
+		}
+
+		@Override
+		public double getMapSize(double pZoomLevel) {
+			return TileSystem.MapSize(pZoomLevel);
+		}
+
+		@Override
+		public double getTileSize(double pZoomLevel) {
+			return TileSystem.getTileSize(pZoomLevel);
+		}
+
+		@Override
+		public PointL toPixels(double pLatitude, double pLongitude, double pMapSize, PointL pReuse) {
+			return TileSystem.getMercatorFromGeo(pLatitude, pLongitude, pMapSize, pReuse, false);
+		}
+
+		@Override
+		public GeoPoint fromPixels(long pX, long pY, double pMapSize, GeoPoint pReuse) {
+			return TileSystem.getGeoFromMercator(pX, pY, pMapSize, pReuse, false, false);
+		}
+	};
+
 	@Deprecated
 	public static final double EarthRadius = GeoConstants.RADIUS_EARTH_METERS;
 	public static final double MinLatitude = -85.05112877980659;
