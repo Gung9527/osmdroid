@@ -226,7 +226,6 @@ public class Projection implements IProjection {
 	 */
 	public long getLongPixelXFromLongitude(final double pLongitude, boolean forceWrap) {
 		return toLongPixels(new GeoPoint(0.0, pLongitude), null, forceWrap).x;
-		//return getLongPixelXFromMercator(TileSystem.getMercatorXFromLongitude(pLongitude, mMercatorMapSize, horizontalWrapEnabled || forceWrap), horizontalWrapEnabled);
 	}
 
 	/**
@@ -235,7 +234,6 @@ public class Projection implements IProjection {
 	 */
 	public long getLongPixelXFromLongitude(final double pLongitude) {
 		return toLongPixels(new GeoPoint(0.0, pLongitude), null, false).x;
-		//return getLongPixelXFromMercator(TileSystem.getMercatorXFromLongitude(pLongitude, mMercatorMapSize, false), false);
 	}
 
 	/**
@@ -244,7 +242,6 @@ public class Projection implements IProjection {
 	 */
 	public long getLongPixelYFromLatitude(final double pLatitude, boolean forceWrap) {
 		return toLongPixels(new GeoPoint(pLatitude, 0.0), null, forceWrap).y;
-		//return getLongPixelYFromMercator(TileSystem.getMercatorYFromLatitude(pLatitude, mMercatorMapSize, verticalWrapEnabled || forceWrap), verticalWrapEnabled);
 	}
 
 	/**
@@ -253,7 +250,6 @@ public class Projection implements IProjection {
 	 */
 	public long getLongPixelYFromLatitude(final double pLatitude) {
 		return toLongPixels(new GeoPoint(pLatitude, 0.0), null, false).y;
-		//return getLongPixelYFromMercator(TileSystem.getMercatorYFromLatitude(pLatitude, mMercatorMapSize, false), false);
 	}
 
 	/**
