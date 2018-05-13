@@ -7,91 +7,70 @@ import org.osgeo.proj4j.CoordinateReferenceSystem;
 import org.osgeo.proj4j.CoordinateTransform;
 import org.osgeo.proj4j.CoordinateTransformFactory;
 import org.osgeo.proj4j.ProjCoordinate;
-import org.osmdroid.util.BoundingBox;
 import org.osmdroid.util.GeoPoint;
-import org.osmdroid.util.ITileSystem;
-import org.osmdroid.util.PointL;
 import org.osmdroid.util.TileSystem;
 
-public class CustomTileSystem implements ITileSystem {
+public class CustomTileSystem extends TileSystem {
 
-    public static final CustomTileSystem MAAAMET;
-    public static final CustomTileSystem MERCATOR;
-
-    private static final CoordinateTransformFactory CT_FACTORY;
-    private static final CRSFactory CRS_FACTORY;
-    private static final CoordinateReferenceSystem CRS_WGS84;
+    private static final RectF BOUNDS = new RectF(40500, 5993000, 1064500, 7017000);
+    private static final CoordinateTransform CT_FROM_WGS84;
 
     static {
-        CT_FACTORY = new CoordinateTransformFactory();
-        CRS_FACTORY = new CRSFactory();
-        CRS_WGS84 = CRS_FACTORY.createFromParameters(
-                "EPSG:4326", "+proj=longlat +datum=WGS84 +no_defs");
+        CoordinateTransformFactory CT_FACTORY = new CoordinateTransformFactory();
+        CRSFactory CRS_FACTORY = new CRSFactory();
+        CoordinateReferenceSystem CRS_WGS84 = CRS_FACTORY.createFromParameters("EPSG:4326",
+                "+proj=longlat +datum=WGS84 +no_defs");
+        CoordinateReferenceSystem CRS = CRS_FACTORY.createFromParameters("EPSG:3301",
+                "+proj=lcc +lat_1=59.33333333333334 +lat_2=58 +lat_0=57.51755393055556 +lon_0=24 +x_0=500000 +y_0=6375000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs");
 
-        MERCATOR = new CustomTileSystem(
-                "EPSG:3857",
-                "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs",
-                new BoundingBox(TileSystem.MaxLatitude, TileSystem.MaxLongitude, TileSystem.MinLatitude, TileSystem.MinLongitude),
-                new RectF(-20037508, -20037508, 20037508, 20037508));
-        MAAAMET = new CustomTileSystem(
-                "EPSG:3301",
-                "+proj=lcc +lat_1=59.33333333333334 +lat_2=58 +lat_0=57.51755393055556 +lon_0=24 +x_0=500000 +y_0=6375000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
-                new BoundingBox(60.4349, 29.4338, 56.7458, 20.373),
-                new RectF(40500, 5993000, 1064500, 7017000));
+        CT_FROM_WGS84 = CT_FACTORY.createTransform(CRS_WGS84, CRS);
     }
 
-    private final BoundingBox mGeographicBoundingBox;
-    private final RectF mProjectedBoundingBox;
-    private final CoordinateTransform mFromWgs84;
-    private final CoordinateTransform mToWgs84;
+    public static GeoPoint fromWgs84(GeoPoint gp) {
+        ProjCoordinate src = new ProjCoordinate(gp.getLongitude(), gp.getLatitude()), dst = new ProjCoordinate();
 
-    public CustomTileSystem(String pName, String pProj4, BoundingBox pGeographicBoundingBox, RectF pProjectedBoundingBox) {
-        CoordinateReferenceSystem crs = CRS_FACTORY.createFromParameters(pName, pProj4);
+        dst = CT_FROM_WGS84.transform(src, dst);
 
-        mGeographicBoundingBox = pGeographicBoundingBox;
-        mProjectedBoundingBox = pProjectedBoundingBox;
-        mFromWgs84 = CT_FACTORY.createTransform(CRS_WGS84, crs);
-        mToWgs84 = CT_FACTORY.createTransform(crs, CRS_WGS84);
+        return new GeoPoint(dst.y, dst.x);
     }
 
     @Override
-    public BoundingBox getGeographicBoundingBox() {
-        return mGeographicBoundingBox;
+    public double getX01FromLongitude(final double pLongitude) {
+        return (pLongitude - BOUNDS.left) / (BOUNDS.right - BOUNDS.left);
     }
 
     @Override
-    public double getMapSize(double pZoomLevel) {
-        return TileSystem.MapSize(pZoomLevel);
+    public double getY01FromLatitude(final double pLatitude) {
+        return (BOUNDS.bottom - pLatitude) / (BOUNDS.bottom - BOUNDS.top);
     }
 
     @Override
-    public double getTileSize(double pZoomLevel) {
-        return TileSystem.getTileSize(pZoomLevel);
+    public double getLongitudeFromX01(final double pX01) {
+        return (BOUNDS.left + pX01 * (BOUNDS.right - BOUNDS.left));
     }
 
     @Override
-    public PointL toPixels(double pLatitude, double pLongitude, double pMapSize, PointL pReuse) {
-        ProjCoordinate src = new ProjCoordinate(pLongitude, pLatitude), dst = new ProjCoordinate();
-        PointL point = (pReuse != null) ? pReuse : new PointL();
-
-        dst = mFromWgs84.transform(src, dst);
-        point.x = (long)(pMapSize * (dst.x - mProjectedBoundingBox.left) / (mProjectedBoundingBox.right - mProjectedBoundingBox.left));
-        point.y = (long)(pMapSize * (mProjectedBoundingBox.bottom - dst.y) / (mProjectedBoundingBox.bottom - mProjectedBoundingBox.top));
-
-        return point;
+    public double getLatitudeFromY01(final double pY01) {
+        return (BOUNDS.bottom - pY01 * (BOUNDS.bottom - BOUNDS.top));
     }
 
     @Override
-    public GeoPoint fromPixels(long pX, long pY, double pMapSize, GeoPoint pReuse) {
-        ProjCoordinate src = new ProjCoordinate(
-                mProjectedBoundingBox.left + (double)pX / pMapSize * (mProjectedBoundingBox.right - mProjectedBoundingBox.left),
-                mProjectedBoundingBox.bottom - (double)pY / pMapSize * (mProjectedBoundingBox.bottom - mProjectedBoundingBox.top)), dst = new ProjCoordinate();
-        GeoPoint gp = (pReuse != null) ? pReuse : new GeoPoint(0.0, 0.0);
+    public double getMinLatitude() {
+        return BOUNDS.top;
+    }
 
-        dst = mToWgs84.transform(src, dst);
-        gp.setLatitude(dst.y);
-        gp.setLongitude(dst.x);
+    @Override
+    public double getMaxLatitude() {
+        return BOUNDS.right;
+    }
 
-        return gp;
+    @Override
+    public double getMinLongitude() {
+        return BOUNDS.left;
+    }
+
+    @Override
+    public double getMaxLongitude() {
+        return BOUNDS.top;
     }
 }
