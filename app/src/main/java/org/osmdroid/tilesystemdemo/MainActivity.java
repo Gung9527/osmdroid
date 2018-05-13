@@ -38,7 +38,6 @@ public class MainActivity extends AppCompatActivity {
 
         super.onCreate(pSavedInstanceState);
         setContentView(R.layout.activity_main);
-        BoundingBox.tileSystem = new CustomTileSystem();
 
         mapView = findViewById(R.id.map);
         mapView.setHorizontalMapRepetitionEnabled(false);
@@ -52,10 +51,12 @@ public class MainActivity extends AppCompatActivity {
                 mapView.setTileSystem(Proj4TileSystem.MERCATOR);
                 break;
             case MAAAMET:
+                BoundingBox.tileSystem = new CustomTileSystem();
                 mapView.setTileSystem(new CustomTileSystem());
                 mapView.setTileSource(new CustomTileSource());
                 break;
             case MAAAMET_PROJ4:
+                BoundingBox.tileSystem = Proj4TileSystem.MAAAMET;
                 mapView.setTileSystem(Proj4TileSystem.MAAAMET);
                 mapView.setTileSource(new CustomTileSource());
                 break;
