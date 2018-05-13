@@ -26,8 +26,8 @@ public class CustomTileSystem extends TileSystem {
         CT_FROM_WGS84 = CT_FACTORY.createTransform(CRS_WGS84, CRS);
     }
 
-    public static GeoPoint fromWgs84(GeoPoint gp) {
-        ProjCoordinate src = new ProjCoordinate(gp.getLongitude(), gp.getLatitude()), dst = new ProjCoordinate();
+    public static GeoPoint fromWgs84(GeoPoint pGeopoint) {
+        ProjCoordinate src = new ProjCoordinate(pGeopoint.getLongitude(), pGeopoint.getLatitude()), dst = new ProjCoordinate();
 
         dst = CT_FROM_WGS84.transform(src, dst);
 
@@ -61,7 +61,7 @@ public class CustomTileSystem extends TileSystem {
 
     @Override
     public double getMaxLatitude() {
-        return BOUNDS.right;
+        return BOUNDS.bottom;
     }
 
     @Override
@@ -71,6 +71,11 @@ public class CustomTileSystem extends TileSystem {
 
     @Override
     public double getMaxLongitude() {
-        return BOUNDS.top;
+        return BOUNDS.right;
+    }
+
+    @Override
+    public double cleanLongitude(final double pLongitude) {
+        return Clip(pLongitude, getMinLongitude(), getMaxLongitude());
     }
 }
