@@ -5,7 +5,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
 import org.osmdroid.config.Configuration;
-import org.osmdroid.util.BoundingBox;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Marker;
@@ -48,16 +47,14 @@ public class MainActivity extends AppCompatActivity {
                 // Do nothing
                 break;
             case MERCATOR_PROJ4:
-                mapView.setTileSystem(Proj4TileSystem.MERCATOR);
+                MapView.setTileSystem(Proj4TileSystem.MERCATOR);
                 break;
             case MAAAMET:
-                BoundingBox.tileSystem = new CustomTileSystem();
-                mapView.setTileSystem(new CustomTileSystem());
+                MapView.setTileSystem(new CustomTileSystem());
                 mapView.setTileSource(new CustomTileSource());
                 break;
             case MAAAMET_PROJ4:
-                BoundingBox.tileSystem = Proj4TileSystem.MAAAMET;
-                mapView.setTileSystem(Proj4TileSystem.MAAAMET);
+                MapView.setTileSystem(Proj4TileSystem.MAAAMET);
                 mapView.setTileSource(new CustomTileSource());
                 break;
         }
